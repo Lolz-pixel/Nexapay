@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NexaPay | Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js" defer></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <div class="app">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+      <div class="brand"><span class="brand-mark"><i data-lucide="zap"></i></span>NexaPay</div>
+      <nav class="nav">
+        <button class="nav-item active" data-view="dashboard"><i data-lucide="layout-dashboard"></i>Dashboard</button>
+        <button class="nav-item" data-view="transactions"><i data-lucide="arrow-left-right"></i>Transactions</button>
+        <button class="nav-item" data-view="cards"><i data-lucide="credit-card"></i>Cards</button>
+        <button class="nav-item" data-view="settings"><i data-lucide="settings"></i>Settings</button>
+      </nav>
+      <button class="nav-item logout" id="logoutBtn"><i data-lucide="log-out"></i>Logout</button>
+    </aside>
+    <div class="overlay" id="overlay"></div>
+
+    <div class="main">
+      <!-- Welcome / top bar -->
+      <header class="topbar">
+        <button class="icon-btn menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="sidebar"><i data-lucide="menu"></i></button>
+        <div class="welcome">
+          <p class="date" id="today"></p>
+          <h1 id="greeting">Welcome back</h1>
+        </div>
+        <button class="icon-btn bell" id="bellBtn" aria-label="Notifications"><i data-lucide="bell"></i><span class="dot" id="bellDot"></span></button>
+      </header>
+
+      <main class="content">
+        <!-- Wallet overview -->
+        <section data-views="dashboard" aria-labelledby="walletTitle">
+          <div class="section-head">
+            <h2 id="walletTitle">Wallet overview</h2>
+            <button class="ghost-btn" id="toggleBalance" aria-pressed="false"><i data-lucide="eye"></i><span>Hide balances</span></button>
+          </div>
+          <div class="stats">
+            <article class="stat stat-main">
+              <p>Total balance</p>
+              <strong data-money="balance"></strong>
+              <span class="stat-note"><i data-lucide="wallet"></i>Available to spend</span>
+            </article>
+            <article class="stat">
+              <p>Income</p>
+              <strong class="pos" data-money="income"></strong>
+              <span class="stat-note"><i data-lucide="trending-up"></i>This month</span>
+            </article>
+            <article class="stat">
+              <p>Expenses</p>
+              <strong class="neg" data-money="expenses"></strong>
+              <span class="stat-note"><i data-lucide="trending-down"></i>This month</span>
+            </article>
+          </div>
+        </section>
+
+        <!-- Quick actions -->
+        <section data-views="dashboard" aria-labelledby="actionsTitle">
+          <div class="section-head"><h2 id="actionsTitle">Quick actions</h2></div>
+          <div class="actions">
+            <button class="action" data-action="send"><span><i data-lucide="send"></i></span>Send Money</button>
+            <button class="action" data-action="add"><span><i data-lucide="plus"></i></span>Add Money</button>
+            <button class="action" data-action="withdraw"><span><i data-lucide="landmark"></i></span>Withdraw</button>
+          </div>
+        </section>
+
+        <!-- Transactions -->
+        <section data-views="dashboard transactions" class="panel" aria-labelledby="txTitle">
+          <div class="section-head"><h2 id="txTitle">Transaction history</h2></div>
+          <div class="tools">
+            <label class="search">
+              <i data-lucide="search"></i>
+              <input type="search" id="search" placeholder="Search by name or description" autocomplete="off" aria-label="Search transactions">
+            </label>
+            <div class="filters" role="group" aria-label="Filter transactions">
+              <button class="chip active" data-filter="all" aria-pressed="true">All</button>
+              <button class="chip" data-filter="income" aria-pressed="false">Income</button>
+              <button class="chip" data-filter="expense" aria-pressed="false">Expenses</button>
+            </div>
+          </div>
+          <ul class="tx-list" id="txList" aria-live="polite"></ul>
+          <p class="empty" id="empty" hidden>No transactions match your search. Try another name or clear the filter.</p>
+        </section>
+
+        <!-- Cards view -->
+        <section data-views="cards" hidden aria-labelledby="cardsTitle">
+          <div class="section-head"><h2 id="cardsTitle">Your cards</h2></div>
+          <div class="vcard">
+            <div class="vcard-top"><span>NexaPay Virtual</span><i data-lucide="wifi"></i></div>
+            <p class="vcard-num">5399 &nbsp;••••&nbsp; ••••&nbsp; 4821</p>
+            <div class="vcard-bottom"><span id="cardName"></span><span>09/29</span></div>
+          </div>
+        </section>
+
+        <!-- Settings view -->
+        <section data-views="settings" hidden class="panel" aria-labelledby="setTitle">
+          <div class="section-head"><h2 id="setTitle">Settings</h2></div>
+          <p class="muted">Your demo data lives in this browser only. Reset it to start again with the sample transactions.</p>
+          <button class="btn danger" id="resetBtn"><i data-lucide="rotate-ccw"></i>Reset demo data</button>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Transfer modal -->
+  <div class="modal" id="modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button class="icon-btn close" id="closeModal" aria-label="Close"><i data-lucide="x"></i></button>
+      <form id="form" novalidate>
+        <h2 id="modalTitle">Send money</h2>
+        <div class="field" data-for="send">
+          <label for="recipient">Recipient name</label>
+          <input id="recipient" type="text" autocomplete="off" placeholder="e.g. Tunde Bakare">
+          <small class="error" id="err-recipient"></small>
+        </div>
+        <div class="field" data-for="send">
+          <label for="account">Account number</label>
+          <input id="account" type="text" inputmode="numeric" maxlength="10" autocomplete="off" placeholder="10 digits">
+          <small class="error" id="err-account"></small>
+        </div>
+        <div class="field">
+          <label for="amount">Amount (₦)</label>
+          <input id="amount" type="text" inputmode="decimal" autocomplete="off" placeholder="0.00">
+          <small class="error" id="err-amount"></small>
+        </div>
+        <div class="field" data-for="send">
+          <label for="note">Note (optional)</label>
+          <input id="note" type="text" maxlength="40" autocomplete="off" placeholder="What is this for?">
+        </div>
+        <button class="btn primary" type="submit" id="submitBtn">Send money</button>
+      </form>
+      <div class="success" id="success" hidden>
+        <span class="success-icon"><i data-lucide="check"></i></span>
+        <h2>Transfer complete</h2>
+        <p id="successMsg"></p>
+        <button class="btn primary" id="doneBtn">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
